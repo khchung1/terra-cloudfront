@@ -1,30 +1,15 @@
-resource "aws_s3_bucket" "b" {
-  bucket = "sctp-staticwebsite-files" 
-
-  # Enable website hosting
-  website {
-    index_document = "home.html" 
-  }
-}
-
-resource "aws_s3_bucket_acl" "b_acl" {
-  bucket = aws_s3_bucket.website_bucket.id
-  acl    = "private"
-}
-
 locals {
-  s3_origin_id = "myS3Origin"
+  s3_origin_id = "sctp-staticwebsite-files"
 }
 
 resource "aws_cloudfront_distribution" "s3_distribution" {
   origin {
-    domain_name              = aws_s3_bucket.b.bucket_regional_domain_name
-    origin_access_control_id = aws_cloudfront_origin_access_control.default.id
+    domain_name              = "sctp-staticwebsite-files.s3.ap-southeast-1.amazonaws.com"
     origin_id                = local.s3_origin_id
   }
 
   enabled             = true
-  is_ipv6_enabled     = true
+  is_ipv6_enabled     = false
   comment             = "khchu"
   default_root_object = "home.html"
 
@@ -99,13 +84,11 @@ resource "aws_cloudfront_distribution" "s3_distribution" {
   restrictions {
     geo_restriction {
       restriction_type = "whitelist"
-      locations        = []
+      locations        = ["SG"]
     }
   }
 
-  tags = {
-    Environment = "learning"
-  }
+
 
   viewer_certificate {
     cloudfront_default_certificate = true
